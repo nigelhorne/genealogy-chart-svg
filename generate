@@ -1,5 +1,8 @@
 #!/usr/bin/env perl
 
+# Generate an input file for https://github.com/davorg/genealogy-chart-svg
+# Written by Nigel Horne <njh@bandsman.co.uk>
+
 use strict;
 use warnings;
 
