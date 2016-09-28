@@ -77,8 +77,10 @@ sub Gedcom::Individual::as_string
 	my %name_components = $nameparser->components();
 	my $first_name = $name_components{'given_name_1'};
 	my $middle_name = $name_components{'middle_name'};
-	my $surname = $name_components{'surname_1'} || $self->surname();
-	my $suffix = $name_components{'suffix'};
+	my $surname = $name_components{'surname_1'};
+	if($name_components{'surname_2'}) {
+		$surname .= ' ' . $name_components{'surname_2'};
+	}
 
 	my $has_maiden_name;
 	if($args{'nee'}) {
@@ -99,12 +101,12 @@ sub Gedcom::Individual::as_string
 
 	if($surname) {
 		$rc .= ' ' . normalize_name($surname);
-		if($suffix) {
+		if(my $suffix = $name_components{'suffix'}) {
 			$rc .= " $suffix";
 		}
 	}
 
-	if($has_maiden_name) {
+	if($has_maiden_name && $self->surname()) {
 		$rc .= ' (nee ' . normalize_name($self->surname()) . ')';
 	}
 
@@ -139,10 +141,10 @@ sub Gedcom::Individual::as_string
 			$rc .= $yob;
 		}
 
-		$rc .= ' -';
+		$rc .= '-' if($yob || $yod);
 
 		if($yod) {
-			$rc .= " $yod";
+			return "$rc $yod";
 		}
 	}
 
