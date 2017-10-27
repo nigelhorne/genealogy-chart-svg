@@ -32,6 +32,8 @@
 use strict;
 use warnings;
 
+use lib '.';
+
 use Genealogy::Chart::SVG;
 
 my $chart = Genealogy::Chart::SVG->new;
