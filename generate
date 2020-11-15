@@ -5,11 +5,47 @@
 
 use strict;
 use warnings;
+use autodie qw(:all);
 
-use Gedcom;
-use Getopt::Std;
-use Lingua::EN::NameCase;
-use Lingua::EN::NameParse;
+my @needfull;
+
+# Install Pre-requisites
+BEGIN {
+	my @modules = (
+		'Gedcom', 'Getopt::Std', 'Lingua::EN::NameCase', 'Lingua::EN::NameParse',
+		'SVG::Timeline::Genealogy',	# for the chart program, not for this one
+	);
+	foreach my $module(@modules) {
+		eval "use $module";
+		if($@) {
+			push @needfull, $module;
+		}
+	}
+	if(scalar(@needfull)) {
+		my $list = join(' ', @needfull);
+		print "Installing $list\n";
+		system("cpan -i $list");
+	}
+}
+
+foreach my $module(@needfull) {
+	my $version;
+	if($module =~ /(.+)\s(.+)$/) {
+		$module = $1;
+		$version = $2;
+	}
+	if($module =~ /.+\/(.+)/) {
+		$module = $1;
+	}
+	eval "require $module";
+	if($@) {
+		die $@;
+	}
+	$module->import();
+	# if($version && ($module::VERSION < $version)) {
+		# die "$module: need $version got ", $module::VERSION;
+	# }
+}
 
 my %opts;
 
@@ -46,10 +82,10 @@ sub doit
 	my $dob = $person->get_value('birth date');
 
 	if($dob && ($dob =~ /(\d{4})$/)) {
-		print "$count,", $person->as_string(), ",$1";
+		print "$count\t", $person->as_string(), "\t$1";
 		my $dod = $person->get_value('death date');
 		if($dod && ($dod =~ /(\d{4})$/)) {
-			print ",$1" if($dod);
+			print "\t$1" if($dod);
 		}
 		print "\n";
 	}
